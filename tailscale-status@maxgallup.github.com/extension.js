@@ -76,6 +76,8 @@ let receiveFilesItem
 let shieldItem;
 let acceptRoutesItem;
 let allowLanItem;
+let acceptDnsItem;
+let sshItem;
 let statusSwitchItem;
 let downloads_path = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD);
 let icon;
@@ -265,6 +267,8 @@ function setAllItems(b) {
     shieldItem.sensitive = b;
     acceptRoutesItem.sensitive = b;
     allowLanItem.sensitive = b;
+    acceptDnsItem.sensitive = b;
+    sshItem.sensitive = b;
     statusSwitchItem.sensitive = b;
     receiveFilesItem.sensitive = b;
     nodesMenu.sensitive = b;
@@ -538,6 +542,8 @@ function cmdTailscalePrefs() {
                     shieldItem.setToggleState(prefs.ShieldsUp === true);
                     acceptRoutesItem.setToggleState(prefs.RouteAll === true);
                     allowLanItem.setToggleState(prefs.ExitNodeAllowLANAccess === true);
+                    acceptDnsItem.setToggleState(prefs.CorpDNS === true);
+                    sshItem.setToggleState(prefs.RunSSH === true);
                 } else {
                     myWarn("failed @ cmdTailscalePrefs");
                 }
@@ -728,6 +734,24 @@ const TailscalePopup = GObject.registerClass(
                 }
             })
 
+            // ------ ACCEPT DNS ------
+            acceptDnsItem = new PopupMenu.PopupSwitchMenuItem("Use Tailscale DNS", false);
+            acceptDnsItem.connect('activate', () => {
+                cmdTailscale({
+                    args: ["set", "--accept-dns=" + acceptDnsItem.state],
+                    addLoginServer: false
+                });
+            })
+
+            // ------ SSH ------
+            sshItem = new PopupMenu.PopupSwitchMenuItem("Tailscale SSH", false);
+            sshItem.connect('activate', () => {
+                cmdTailscale({
+                    args: ["set", "--ssh=" + sshItem.state],
+                    addLoginServer: false
+                });
+            })
+
             // ------ RECEIVE FILES MENU ------
             receiveFilesItem = new PopupMenu.PopupMenuItem("Accept incoming files");
             receiveFilesItem.connect('activate', () => {
@@ -780,6 +804,8 @@ const TailscalePopup = GObject.registerClass(
             this.menu.addMenuItem(shieldItem);
             this.menu.addMenuItem(acceptRoutesItem);
             this.menu.addMenuItem(allowLanItem);
+            this.menu.addMenuItem(acceptDnsItem);
+            this.menu.addMenuItem(sshItem);
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(receiveFilesItem);
             this.menu.addMenuItem(sendMenu);
@@ -834,6 +860,8 @@ export default class TailscaleStatusExtension extends Extension {
         shieldItem = null;
         acceptRoutesItem = null;
         allowLanItem = null;
+        acceptDnsItem = null;
+        sshItem = null;
         statusSwitchItem = null;
         downloads_path = null;
         icon = null;
