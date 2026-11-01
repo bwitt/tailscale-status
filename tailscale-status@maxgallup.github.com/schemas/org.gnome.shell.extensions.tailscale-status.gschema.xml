@@ -6,6 +6,11 @@
         <summary>Login-Server Url</summary>
         <description>If you are using Headscale for your control server, use your Headscale instance's URL.</description>
     </key>
+    <key name="hidden-items" type="as">
+        <default>[]</default>
+        <summary>Hidden menu items</summary>
+        <description>Menu items that are not shown.</description>
+    </key>
     
   </schema>
 </schemalist>

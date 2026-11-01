@@ -27,6 +27,37 @@ export default class TailscaleStatusExtensionPreferences extends ExtensionPrefer
             
           });
         row.add_suffix(textBox);
+
+        const itemsGroup = new Adw.PreferencesGroup({ title: 'Menu Items' });
+        page.add(itemsGroup);
+
+        // Names must match optionalItems in extension.js
+        const items = [
+            ['nodes', 'Nodes'],
+            ['accounts', 'Accounts'],
+            ['block-incoming', 'Block Incoming'],
+            ['accept-routes', 'Accept Routes'],
+            ['allow-lan', 'Allow Direct Lan Access'],
+            ['receive-files', 'Accept incoming files'],
+            ['send-files', 'Send Files'],
+            ['exit-nodes', 'Exit Nodes'],
+            ['log-out', 'Log Out'],
+            ['about', 'About'],
+        ];
+        for (const [name, title] of items) {
+            const itemRow = new Adw.SwitchRow({
+                title: title,
+                active: !settings.get_strv('hidden-items').includes(name)
+            });
+            itemRow.connect('notify::active', (r) => {
+                let hidden = settings.get_strv('hidden-items').filter((n) => n != name);
+                if (!r.active) {
+                    hidden.push(name);
+                }
+                settings.set_strv('hidden-items', hidden);
+            });
+            itemsGroup.add(itemRow);
+        }
     
         window.add(page);
     }

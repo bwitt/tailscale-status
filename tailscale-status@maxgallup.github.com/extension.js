@@ -83,7 +83,19 @@ let icon_down;
 let icon_up;
 let icon_exit_node;
 let SETTINGS;
+let optionalItems;
+let hiddenItemsId;
 
+
+// Hide the menu items listed in the hidden-items setting.
+function updateVisibleItems() {
+    const hidden = SETTINGS.get_strv('hidden-items');
+    for (const [name, items] of Object.entries(optionalItems)) {
+        items.forEach((item) => {
+            item.visible = !hidden.includes(name);
+        });
+    }
+}
 
 function myWarn(string) {
     console.log("🟡 [tailscale-status]: " + string);
@@ -761,6 +773,20 @@ const TailscalePopup = GObject.registerClass(
             aboutMenu.menu.addMenuItem(infoMenu);
             aboutMenu.menu.addMenuItem(contributeMenu);
             aboutMenu.menu.addMenuItem(healthMenu);
+
+            // Keys must match the hidden-items names in prefs.js
+            optionalItems = {
+                'nodes': [nodesMenu],
+                'accounts': [accountIndicator, accountButton, accountsMenu],
+                'block-incoming': [shieldItem],
+                'accept-routes': [acceptRoutesItem],
+                'allow-lan': [allowLanItem],
+                'receive-files': [receiveFilesItem],
+                'send-files': [sendMenu],
+                'exit-nodes': [exitNodeMenu],
+                'log-out': [logoutButton],
+                'about': [aboutMenu],
+            };
         }
     }
 );
@@ -778,10 +804,16 @@ export default class TailscaleStatusExtension extends Extension {
 
         tailscale = new TailscalePopup(this.path);
         Main.panel.addToStatusArea('tailscale', tailscale, 1);
+
+        updateVisibleItems();
+        hiddenItemsId = SETTINGS.connect('changed::hidden-items', updateVisibleItems);
     }
 
     disable() {
 
+        SETTINGS.disconnect(hiddenItemsId);
+        hiddenItemsId = null;
+        optionalItems = null;
         tailscale.destroy();
         tailscale = null;
         SETTINGS = null;
