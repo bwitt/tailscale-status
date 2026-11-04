@@ -411,11 +411,40 @@ function sendFiles(dest) {
                 let [, stdout, stderr] = proc.communicate_utf8_finish(res);
                 if (proc.get_successful()) {
                     if (stdout != '') {
-                        files = stdout.trim().split("|")
+                        let files = stdout.trim().split("|")
                         cmdTailscaleFile(files, dest)
                     }
                 } else {
                     myError("zenity failed");
+                }
+            } catch (e) {
+                myError(e);
+            }
+        });
+    } catch (e) {
+        myError(e);
+    }
+}
+
+function cmdTailscaleFile(files, dest, unprivileged = true) {
+    let args = ["file", "cp"].concat(files, [dest + ":"])
+    let command = (unprivileged ? ["tailscale"] : ["pkexec", "tailscale"]).concat(args);
+
+    try {
+        let proc = Gio.Subprocess.new(
+            command,
+            Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+        );
+        proc.communicate_utf8_async(null, null, (proc, res) => {
+            try {
+                proc.communicate_utf8_finish(res);
+                if (proc.get_successful()) {
+                    Main.notify('Sent files to ' + dest);
+                } else if (unprivileged) {
+                    cmdTailscaleFile(files, dest, false)
+                } else {
+                    Main.notify('Unable to send files to ' + dest, 'check logs with journalctl -f -o cat /usr/bin/gnome-shell');
+                    myWarn("failed to send files to " + dest)
                 }
             } catch (e) {
                 myError(e);
