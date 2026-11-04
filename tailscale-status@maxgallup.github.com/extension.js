@@ -160,7 +160,12 @@ function sortArrProp(p) {
         const [_aa, _bb] = [a[p] ?? [], b[p] ?? []]
         for (let i = 0; i < Math.max(_aa.length, _bb.length); i++) {
             const [_a, _b] = [_aa[i], _bb[i]]
-            if (_a < _b) {
+            // a shorter path sorts before any path it is a prefix of
+            if (_a === undefined) {
+                return -1;
+            } else if (_b === undefined) {
+                return 1;
+            } else if (_a < _b) {
                 return -1;
             } else if (_b < _a) {
                 return 1;
@@ -168,6 +173,7 @@ function sortArrProp(p) {
                 continue;
             }
         }
+        return 0;
     }
 }
 /** @param {'desc' | undefined} desc - descending sort */
@@ -195,6 +201,7 @@ function combineSort(...sorters) {
             }
             // else this sorter considers them equal, try the next one.
         }
+        return 0;
     }
 }
 function getUsername(json) {
