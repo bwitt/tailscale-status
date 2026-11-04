@@ -77,7 +77,7 @@ let shieldItem;
 let acceptRoutesItem;
 let allowLanItem;
 let statusSwitchItem;
-let downloads_path = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD);
+let downloads_path;
 let icon;
 let icon_down;
 let icon_up;
@@ -773,6 +773,7 @@ let tailscale;
 export default class TailscaleStatusExtension extends Extension {
     enable() {
         SETTINGS = this.getSettings('org.gnome.shell.extensions.tailscale-status');
+        downloads_path = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOWNLOAD);
 
         cmdTailscaleStatus()
 
